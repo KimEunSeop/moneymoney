@@ -11,17 +11,35 @@ function init() {
   enhancedMonthlyAnalysis();
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  const menuToggle = document.querySelector('.menu-toggle');
+  const navLinks = document.querySelector('.nav-links');
+  const overlay = document.createElement('div');
+  overlay.classList.add('overlay');
+  document.body.appendChild(overlay);
+
+  menuToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('show');
+    overlay.classList.toggle('show');
+  });
+
+  overlay.addEventListener('click', () => {
+    navLinks.classList.remove('show');
+    overlay.classList.remove('show');
+  });
+});
+
+
+
 // 로컬 스토리지에서 데이터 로드
 function loadData() {
   const savedTransactions = localStorage.getItem('transactions');
   if (savedTransactions) {
     transactions = JSON.parse(savedTransactions);
-
-    // 카테고리 필드 검증 및 초기화
     Object.values(transactions).forEach(dayTransactions => {
       dayTransactions.forEach(transaction => {
         if (transaction.type === 'expense' && !transaction.category) {
-          transaction.category = '기타'; // 기본 카테고리 설정
+          transaction.category = '기타'; 
         }
       });
     });
@@ -30,10 +48,9 @@ function loadData() {
   const savedRegularItems = localStorage.getItem('regularItems');
   if (savedRegularItems) {
     const regularItems = JSON.parse(savedRegularItems);
-    integrateRegularItems(regularItems); // 정기 항목 반영
+    integrateRegularItems(regularItems); 
   }
-
-  updateSummary(); // 수입/지출 합계 업데이트
+  updateSummary(); 
 }
 
 function integrateRegularItems(regularItems) {
@@ -46,32 +63,21 @@ function integrateRegularItems(regularItems) {
     if (!transactions[dateKey]) {
       transactions[dateKey] = [];
     }
-
-    // 디버깅: item 전체 정보 출력
-    console.log('현재 처리 중인 item:', item);
-
     const newTransaction = {
-      type: item.type, // 'income' 또는 'expense'를 그대로 사용
+      type: item.type, 
       description: item.name,
       amount: item.amount,
-      category: item.type === 'income' ? '수입' : '정기결제', // type에 따라 category 설정
+      category: item.type === 'income' ? '수입' : '정기결제', 
     };
 
-    // 중복 방지 로직
     const isDuplicate = transactions[dateKey].some(
       t => t.description === item.name && t.amount === item.amount && t.type === item.type
     );
 
     if (!isDuplicate) {
       transactions[dateKey].push(newTransaction);
-
-      // 디버깅: 추가된 거래 내역 확인
-      console.log('추가된 거래 내역:', newTransaction);
     }
   });
-
-  // 디버깅: 통합된 거래내역 상태 확인
-  console.log('통합된 거래내역:', transactions);
 }
 
 // 데이터 저장
@@ -674,7 +680,6 @@ function renderWeeklyBarChart(dailyExpenses) {
     }
   });
 }
-
 
 // 월간 분석 상세 기능
 function enhancedMonthlyAnalysis() {
